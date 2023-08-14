@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import './UserManage.scss';
-import { getAllUsers } from '../../services/userService';
+import { getAllUsers, createNewUserService } from '../../services/userService';
 import ModalUser from './ModalUser';
 
 class UserManage extends Component {
@@ -16,6 +16,10 @@ class UserManage extends Component {
     }
 
     async componentDidMount() {
+        this.getAllUsersFromReact();
+    }
+
+    getAllUsersFromReact = async () => {
         let response = await getAllUsers('ALL');
         if (response && response.errCode === 0) {
             this.setState({
@@ -23,9 +27,7 @@ class UserManage extends Component {
             }, () => {
                 // console.log('check state user 2: ', this.state.arrUsers);
             })
-            // console.log('check state user 1: ', this.state.arrUsers);
         }
-        // console.log('get user from node.js: ', response)
     }
 
 
@@ -41,15 +43,36 @@ class UserManage extends Component {
         })
     }
 
+    createNewUser = async (data) => {
+        try {
+            let response = await createNewUserService(data);
+            console.log('response from create user: ',response )
+            if ( response && response.errCode !== 0) {
+                alert(response.message);
+            } else {
+                await this.getAllUsersFromReact();
+                this.setState ({
+                    isOpenModalUser: false,
+                })
+            }
+        } catch(e) {
+            console.log(e);
+        }
+        // console.log('data from Modal: ', data);
+        
+        
+    }
+
+
     render() {
         // console.log('check render ', this.state)
         let arrUsers = this.state.arrUsers;
         return (
             <div className="users-container">
-                <ModalUser 
-                    isOpen = {this.state.isOpenModalUser}
-                    toggleFromParent = {this.toggleUserModal}
-                    test = 'abc-test'
+                <ModalUser
+                    isOpen={this.state.isOpenModalUser}
+                    toggleFromParent={this.toggleUserModal}
+                    createNewUser={this.createNewUser}
                 />
                 <div className='title text-center'>Manage users with Ngocht</div>
                 <div className='mx-1'>
@@ -59,32 +82,33 @@ class UserManage extends Component {
                 </div>
                 <div className='users-table mt-3 mx-1'>
                     <table id="customers">
-                        <tr>
-                            <th>Email</th>
-                            <th>FirstName</th>
-                            <th>LastName</th>
-                            <th>Address</th>
-                            <th>Action</th>
-                        </tr>
+                        <tbody>
+                            <tr>
+                                <th>Email</th>
+                                <th>FirstName</th>
+                                <th>LastName</th>
+                                <th>Address</th>
+                                <th>Action</th>
+                            </tr>
 
-                        {arrUsers && arrUsers.map((item, index) => {
-                            // console.log('ngocht check map ', item, index)
-                            return (
-                                <tr key={index}>
-                                    <td>{item.email}</td>
-                                    <td>{item.firstName}</td>
-                                    <td>{item.lastName}</td>
-                                    <td>{item.address}</td>
+                            {arrUsers && arrUsers.map((item, index) => {
+                                // console.log('ngocht check map ', item, index)
+                                return (
+                                    <tr key={index}>
+                                        <td>{item.email}</td>
+                                        <td>{item.firstName}</td>
+                                        <td>{item.lastName}</td>
+                                        <td>{item.address}</td>
 
-                                    <td>
-                                        <button className='btn-edit'><i class="fas fa-pencil-alt"></i></button>
-                                        <button className='btn-delete'><i class="fas fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                            )
-                        })
-                        }
-
+                                        <td>
+                                            <button className='btn-edit'><i class="fas fa-pencil-alt"></i></button>
+                                            <button className='btn-delete'><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                )
+                            })
+                            }
+                        </tbody>
                     </table>
                 </div>
             </div>
