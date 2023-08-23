@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import './UserManage.scss';
-import { getAllUsers, createNewUserService } from '../../services/userService';
+import { getAllUsers, createNewUserService, deleteUserService } from '../../services/userService';
 import ModalUser from './ModalUser';
 
 class UserManage extends Component {
@@ -63,7 +63,19 @@ class UserManage extends Component {
         
     }
 
-
+    handleDeleteUser = async(user) => {
+        console.log('click delete', user)
+        try {
+            let res = await deleteUserService(user.id);
+            if (res && res.errCode === 0) {
+                await this.getAllUsersFromReact();
+            } else {
+                alert(res.message)
+            }
+        }catch(e) {
+            console.log(e)
+        }
+    }
     render() {
         // console.log('check render ', this.state)
         let arrUsers = this.state.arrUsers;
@@ -102,7 +114,7 @@ class UserManage extends Component {
 
                                         <td>
                                             <button className='btn-edit'><i class="fas fa-pencil-alt"></i></button>
-                                            <button className='btn-delete'><i class="fas fa-trash"></i></button>
+                                            <button className='btn-delete' onClick={() => this.handleDeleteUser(item)}><i class="fas fa-trash"></i></button>
                                         </td>
                                     </tr>
                                 )
